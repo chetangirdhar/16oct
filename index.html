@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Page</title>
+
+    <style>
+        body {
+            background-color: #f0f0f0; /* Light gray background */
+            font-family: Arial, sans-serif;
+        }
+        h1, h2 {
+            background-color: #efeff1; /* Light green background */
+            padding: 10px;
+            border-radius: 5px;
+        }
+        table {
+            background-color: #ffffff; /* White background for the table */
+            border: 1px solid rgb(120, 13, 13);
+            border-collapse: separate;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid rgb(71, 87, 76);
+            padding: 10px;
+            text-align: left;
+        }
+        img {
+            width: 100px;
+        }
+        button {
+            background-color: #4CAF50; /* Green background */
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049; /* Darker green on hover */
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9; /* Light gray for even rows */
+        }
+        tr:nth-child(odd) {
+            background-color: #ffffff; /* White for odd rows */
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Product List</h1>
+    <button id="loadData">Load Products</button>
+    <a href="cart.html" id="viewCart" style="margin-top: 10px; display: block;">View Cart</a>
+    
+    <h2>Available Products</h2>
+    <table id="table">
+        <tr>
+            <th>S.No</th>
+            <th>Title</th>
+            <th>Price</th>
+            <th>Image</th>
+            <th>Add to Cart</th>
+        </tr>
+    </table>
+
+    <script>
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+        document.getElementById("loadData").addEventListener("click", function() {
+            fetch('https://fakestoreapi.com/products')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(json => {
+                    const table = document.getElementById('table');
+                    table.innerHTML = `
+                        <tr>
+                            <th>S.No</th>
+                            <th>Title</th>
+                            <th>Price</th>
+                            <th>Image</th>
+                            <th>Add to Cart</th>
+                        </tr>
+                    `;
+
+                    json.forEach((product, index) => {
+                        let tableRow = `<tr>`;
+                        tableRow += `<td>${index + 1}</td>`;
+                        tableRow += `<td>${product.title}</td>`;
+                        tableRow += `<td>$${product.price}</td>`;
+                        tableRow += `<td><img src="${product.image}" alt="${product.title}"></td>`;
+                        tableRow += `<td><button onclick="addToCart(${product.id}, '${product.title}', ${product.price})">Add to Cart</button></td>`;
+                        tableRow += `</tr>`;
+                        table.innerHTML += tableRow;
+                    });
+                })
+                .catch(error => {
+                    console.error('There has been a problem with your fetch operation:', error);
+                });
+        });
+
+        function addToCart(id, title, price) {
+            const existingProduct = cart.find(item => item.id === id);
+
+            if (existingProduct) {
+                existingProduct.quantity += 1;
+            } else {
+                cart.push({ id, title, price, quantity: 1 });
+            }
+
+            // Store cart in local storage
+            localStorage.setItem('cart', JSON.stringify(cart));
+            alert(`${title} has been added to your cart.`);
+        }
+    </script>
+</body>
+</html>
